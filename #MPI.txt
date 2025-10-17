@@ -1,0 +1,185 @@
+MPI:
+1.	sudo apt install python3
+2.	sudo apt install -y -qq mpich
+3.	sudo apt install python3-pip
+4.	sudo apt install python3-mpi4py –y
+5.	gedit mpi_example.py
+
+from mpi4py import MPI
+comm = MPI.COMM_WORLD
+rank = comm.Get_rank()
+size = comm.Get_size()
+print(f"Hello from process {rank} out of {size}")
+
+6.	mpiexec -n 4 python3 mpi_example.py
+
+
+OPEN MPI
+1.	sudo apt-get install libomp-dev
+2.	gedit hello_omp.cpp
+3.	g++ -fopenmp hello_omp.cpp -o hello_omp.out
+4.	./hello_omp.out
+
+SAMPLE 1: Hello World
+#include<omp.h>
+#include<iostream>
+
+int main(){
+omp_set_num_threads(4);
+#pragma omp parallel
+{
+int thread_id = omp_get_thread_num();
+int total_threads = omp_get_num_threads();
+std::cout << "hello world from thread " << thread_id <<" out of "<< total_threads << " threads.\n";
+}
+return 0;
+}
+
+Sample 2: Loop level Parallelism with reduction
+
+#include <omp.h>
+#include <iostream>
+#include <chrono>
+#include <iomanip>
+
+#define THREAD_COUNT 5
+
+using namespace std;
+
+long long serial_sum(int n){
+    long long sum = 0;
+    for(int i = 1; i <= n; ++i){
+        sum += i;
+    }
+    return sum;
+}
+
+long long parallel_sum(int n){
+    long long sum = 0;
+    #pragma omp parallel for reduction(+:sum)
+    for(int i = 1; i <= n; ++i){
+        sum += i;
+    }
+    return sum;
+}
+
+int main(int argc, char** argv) {
+    // set number of threads for OpenMP
+    omp_set_num_threads(THREAD_COUNT);
+
+    int n = 100000000; // 1e8
+    cout << "Threads (requested): " << THREAD_COUNT << "\n";
+    cout << "Array size / N: " << n << "\n\n";
+
+    // Serial timing
+    auto start_time1 = chrono::high_resolution_clock::now();
+    long long ser_sum = serial_sum(n);
+    auto end_time1 = chrono::high_resolution_clock::now();
+    chrono::duration<double> duration1 = end_time1 - start_time1;
+
+    // Parallel timing
+    auto start_time2 = chrono::high_resolution_clock::now();
+    long long par_sum = parallel_sum(n);
+    auto end_time2 = chrono::high_resolution_clock::now();
+    chrono::duration<double> duration2 = end_time2 - start_time2;
+
+    // Print results
+    cout << fixed << setprecision(6);
+    cout << "Serial sum   : " << ser_sum << "\n";
+    cout << "Parallel sum : " << par_sum << "\n\n";
+
+    cout << "Serial time   : " << duration1.count() << " s\n";
+    cout << "Parallel time : " << duration2.count() << " s\n";
+
+    if (duration2.count() > 0.0) {
+        cout << "Speedup (serial / parallel): " << duration1.count() / duration2.count() << "x\n";
+    }
+
+    // correctness check
+    if (ser_sum == par_sum) {
+        cout << "Result check: OK (sums match)\n";
+    } else {
+        cout << "Result check: MISMATCH!\n";
+    }
+
+    // theoretical sum (for reference)
+    long long formula = (long long)n * (n + 1) / 2;
+    cout << "Theoretical sum (n*(n+1)/2): " << formula << "\n";
+
+    return 0;
+}
+       
+SAMPLE 3: Using private
+
+#include <omp.h>
+#include <iostream>
+using namespace std;
+
+int main() {
+    int x = 10;
+    #pragma omp parallel private(x)
+    {
+        cout << "Thread " << omp_get_thread_num() << " at starting has x = " << x << endl;
+        x = omp_get_thread_num();
+        cout << "Thread " << omp_get_thread_num() << " after initialization has x = " << x << endl;
+    }
+    cout << "Outside parallel region, x = " << x << endl;
+    return 0;
+}
+
+SAMPLE 4: usage of first private
+#include <omp.h>
+#include <iostream>
+using namespace std;
+
+int main() {
+    int x = 10;
+
+    #pragma omp parallel firstprivate(x)
+    {
+        cout << "Thread " << omp_get_thread_num() << " starts with x = " << x << endl;
+        x += omp_get_thread_num();
+        cout << "Thread " << omp_get_thread_num() << " ends with x = " << x << endl;
+    }
+
+    cout << "Outside parallel region, x = " << x << endl;
+
+    return 0;
+}
+
+
+SAMPLE 5: using last private
+#include <omp.h>
+#include <iostream>
+using namespace std;
+
+int main() {
+    int x = 10;
+    #pragma omp parallel for lastprivate(x)
+    for (int i = 0; i < 4; i++) {
+        x = i;
+        cout << "Thread " << omp_get_thread_num() << " working on iteration " << i << " sets x = " << x << endl;
+    }
+    cout << "Outside parallel region, x = " << x << endl;
+    return 0;
+}
+
+SAMPLE 6: using critical section
+
+#include <omp.h>
+#include <iostream>
+using namespace std;
+
+int main() {
+    int total_sum=0;
+    #pragma omp parallel for
+    for (int i = 0; i < 1000; i++) {
+        int local_sum = i;
+        #pragma omp critical
+        {
+        total_sum += local_sum;
+        }
+    }
+    cout << "total sum = " << total_sum << endl;
+    return 0;
+}

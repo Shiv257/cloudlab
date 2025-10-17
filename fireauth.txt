@@ -1,0 +1,173 @@
+app.js
+
+import React, { useState, useEffect } from "react";
+import { db, auth } from "./firebase";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  updateDoc,
+  deleteDoc,
+  doc
+} from "firebase/firestore";
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged 
+} from "firebase/auth";
+
+function App() {
+  const [name, setName] = useState("");
+  const [users, setUsers] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [currentUser, setCurrentUser] = useState(null);
+
+  const usersRef = collection(db, "users");
+
+  // --- Auth functions ---
+  const signUp = async () => {
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      setEmail(""); setPassword("");
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const login = async () => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      setEmail(""); setPassword("");
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const logout = async () => {
+    await signOut(auth);
+  };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      if (user) fetchUsers();
+    });
+    return unsubscribe;
+  }, []);
+
+  // --- Firestore CRUD functions ---
+  const addUser = async () => {
+    if (!name.trim()) return;
+    await addDoc(usersRef, { name });
+    setName("");
+    fetchUsers();
+  };
+
+  const fetchUsers = async () => {
+    const data = await getDocs(usersRef);
+    setUsers(data.docs.map((d) => ({ id: d.id, ...d.data() })));
+  };
+
+  const updateUser = async (id) => {
+    if (!name.trim()) return;
+    await updateDoc(doc(db, "users", id), { name });
+    setEditingId(null); setName("");
+    fetchUsers();
+  };
+
+  const deleteUser = async (id) => {
+    await deleteDoc(doc(db, "users", id));
+    fetchUsers();
+  };
+
+  if (!currentUser) {
+    return (
+      <div style={{ textAlign: "center", marginTop: 50 }}>
+        <h2>Firebase Auth Demo</h2>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email"
+          style={{ margin: "5px" }}
+        />
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
+          style={{ margin: "5px" }}
+        />
+        <div>
+          <button onClick={signUp}>Sign Up</button>
+          <button onClick={login} style={{ marginLeft: 10 }}>Login</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ textAlign: "center", marginTop: 50 }}>
+      <h2>Firestore CRUD Demo</h2>
+      <p>Logged in as: {currentUser.email}</p>
+      <button onClick={logout}>Logout</button>
+
+      <div style={{ marginTop: 20 }}>
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Enter name"
+        />
+        {editingId ? (
+          <button onClick={() => updateUser(editingId)}>Update</button>
+        ) : (
+          <button onClick={addUser}>Add</button>
+        )}
+      </div>
+
+      <ul style={{ listStyle: "none", padding: 0, marginTop: 20 }}>
+        {users.map((user) => (
+          <li key={user.id} style={{ marginBottom: "10px" }}>
+            {user.name}
+            <button
+              onClick={() => { setName(user.name); setEditingId(user.id); }}
+              style={{ marginLeft: 10 }}
+            >EDIT</button>
+            <button
+              onClick={() => deleteUser(user.id)}
+              style={{ marginLeft: 5, color: "red" }}
+            >DELETE</button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export default App;
+
+firebase.js
+
+// firebase.js
+import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+
+export const db = getFirestore(app);
+export const auth = getAuth(app);
+
+export default app;

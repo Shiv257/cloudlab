@@ -1,0 +1,614 @@
+#DROPBOX
+
+1. Dropbox developer console
+2. Create App
+3. Name, Full DropBox, Choose API
+4. Permissions -> first 4 write, content-read -> submit
+5. Copy generated url
+6. npx create-react-app myapp
+7. Edit src->app.js
+8. Open dropbox.com
+9. cd myapp
+10. npm install
+11. npm start
+
+import React, { useState, useEffect } from "react";
+
+function App() {
+const [file, setFile] = useState(null);
+const [uploadedFiles, setUploadedFiles] = useState([]);
+
+const ACCESS_TOKEN =
+  "sl.u.AGCVD3MuXUMucA86BRNWrlMqkZHGchck-zTnquFAqG9uQW736koo5WQrNneCSRITN1X09HhoUF44CdYUP78Y-g6hEcuYdjlRCSbvCBQLl2hZex2-oiL7437D2zHPYzRahQxyeoy70w7yetG6GhYseFdyeeoMow4J-o3QNB20ITbckstyvGfKEcQzd38NAQaQgtzTiwHkyH8elbc_mYyv1LXbyW_cixRQETwMpqldiWasuiSxEg9YVeoKwzFymCVF05Q2EsdA1Obn8oM-61tyHRroF98W71NO28Otcwt8vYK_vy_Iu6Q4o7xEOkuJQEt6kx8sxPCUNzThfs-6VafnoG4CtjmZhvREnaEwcH9PnLJVYZFtCyRcJDsmLe4AUDrXoEeb3flFkxrf7saqasHSfZ_zmKIhhYMy3y3yV8canOziJWOSxhfSLorf0NhM0nSueSpIRqYAsYir8EQnERhF7NSU0XzhrJOZ81KbzQHMlseESV5WeYmeKGNyjtXPuHxoGlhj6KrjOO3g7FrFkytelVyo13JkXPhoRcQ3VRob-YA2dEujzlaGgs5OhEt_gLPlPeswuR9KkzZ_xkSRRncayU9d9z5NOJdRHvMia5q0GXOB99a6F2hu2DPjGrBzjmxqnub-lASXO6pNnya1NN4-Pmw0QrXZomJPUegru1T2daRBtruIMpI-jcJw5QLyYNbp235zCda_ahzlmujabVx3NCyp4LZqu7aO1AbdP_omJTFVVVbxWgWHGjNptQETxJdTET35zx1c-nG47aAjmAuqwNeDHFhAEkMh3up354yhK-RxQVQNwTrB6xPoLRcN2e83bi8Udn0dMU12cC03vxBSKRywCB-h89GnIfMNKvrRRLuNB-xDOP_MNOhozTPij-BAyVcmTmqhwEV5FsgHsqJFvLDzjyv7np-BnUpqSuV8993Fh-esTPN8LpIQOof9XTBIqXWFhBDbQP7OhDwTxp1s5dpxxcwsuQZ0dXrIG21N29fLvq2KV1JrzFxiDKv3zCnxK7KzeyE8mHA8U5Ya6HnytbPWrOQoMjxCBeRVVQOm9QDapf5_4XjK4Tu8Bq68qKs2MJl5wcl6xFYzyWkjqJmHMh8OdBXEUkIzNC1TLTUtGGHp2edbE6vy3TzcaEQwdXpQzDTolGQPdT6CspApufNT5g1K1RK3QU9fSjkY5gAn6_sK8eo1-o2Uw3C-O-wsRPOn-4OCligxwLa-pZWHRswoCS_LoAuvZ62gvtktFBorso5z4PKzSh23IAPhnGIDcNsxyXB12nF7emgaEDtEtLaWbWrleT0c1TVo5FEikWgqF8NQ-QUM07yZ9FHD9ExXrTeA-vtt7T02K4KtJX1euPqZOQWcAxvi0oOWZT9t7swSEzX9kKFtx-mSwjgTmw-JZdIr_87Fr9RhHFXMolJxpzTR2AyCf6msUK1t6Nzeq5U6LMk9xBXQz0stzW_oFy0vueurCq4";
+
+import React, { useState, useEffect } from "react";
+
+function App() {
+  const [file, setFile] = useState(null);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [editingFile, setEditingFile] = useState(null);
+  const [editContent, setEditContent] = useState("");
+
+  const ACCESS_TOKEN = "sl.u.AGCKChCbObfJmBMJmoZ42iK5Hw9p2ZkWuInbKxplBcB8M2uw7u9i5TizXzn7os8udV74RrYVLX206AJD-KwDdGodAibAYDYGr5FdaXDZCmkquW2tSvcqkcf_2vz3XgoFXkp-oVvSuSv0M2y8Wzvc6GUL9w9tX9RcMZBIq9O1ALdUNW-Q7b1NGGFgdVYsQpX5yKUrWEWc0lFKVS8_qfcHCXErpuTTmq4blvCQXtu0tSlX6vLr8xBXaYK2-uTgvKt6BOizuDfkR-Tb3UT0-qLzTJmEPsEBLM9y3NnMJkgJDD67o9f69xalD9dHn36QUzsEW-ArdGQKuCslwed3xnQQVd0iZf97JbV0NBJYBZmHqD2efcpqNH9ll9UWegTC_WFXpQ3bSL4T9DEDifP46N8oBvIYBymTmIMRJEb0-SLOIG3AaWsupfcNactTrNWzYNODAy82cx2M-nmUk_fJCfwmaKVFhACNpV4398KQbZzAVcL7aNAVvxkrpEJrxRK7QbyYmDbuh8bflu8YLFR0jLgCpMGhEKxSY6QXqqDWOpIe-NEMJJiKohz9DanHfjAPIo0ql6bneO80Q15k0kvDUjNjQSZIRrL3CKhfgVJofhOvUfUd1oHdA8CYTBmf5Uj2vhDHcSeKuJHBC0Cwm5HVzMZV8ffYy0MT1BLSpb9VlFmu4kV00ZSw78rWBVDgb_sdXgLUPGnXluIq1pteO4DnEHLYVFSOzulHAKYXkhBz4wgKl2IRhD8lBn0ZbQYZO_y5KuKYaHa4xJyhXPY12z58aViao84Aos_ZAJhW2HyooO5OAT-VB3_3K9FKmsjPIKpWZ238xVDm2qHOFfjfvAhTSVdkINZxy7gnSxsku8Z_c1-geqcMjX0BoKz-iaB1Co7FRCSq-Z5TNY7jZqKouoMDxXTTRUmuotQktmJyaEd-NFODq5DoAX2P6s1_1FnfjYHTd4unuirYDJXE9zKk-XluNnHfwpunKtyuxglfeV3zEfc94V9T0UIa7m6gYVpL6KvtFFJ1gtOd5TzUFeqPuUSLmO9e9QxXzlw6THhh1nsVHlXu5fTerxHBljq8XofN4KaE2pULrOI2ITyarbmNDEoY41tXLHd5ta5L2IjSbb1kTqMbwMP8hS5D_NZGh6JTaV7miFPimxnIM4UCphXdUwaRYC4iMO0_cpNc_m_PuWWBrdI2x_rDFC72Zg7OS0uUwlz6zE1L8VCmLLGZGuJfNNTHqU_VbdfFeVgxDLyahh1iP5w1Dc5PDBb9DuWemVGpaFB4WvM3e5pElI1XOaeAUmd9Cr2CVkN7kl8hagVv1TFhjW_DmfU_JabgdHlmuEiDf5ARV2uWAxL-wLkPGS5exnKZzxNO5iWMUi5iuaY2H9HF04c5pT48AkGq61RtDaZknwRQ356OKxWE9VHD0Jo_JzS7k-jKE0M778em8BRgh-mzpmI68q796Q";
+
+  // Upload file
+  const uploadToDropbox = async () => {
+    if (!file) return alert("Select a file first!");
+    try {
+      const res = await fetch("https://content.dropboxapi.com/2/files/upload", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${ACCESS_TOKEN}`,
+          "Dropbox-API-Arg": JSON.stringify({
+            path: "/" + file.name,
+            mode: "add",
+            autorename: true,
+            mute: false,
+          }),
+          "Content-Type": "application/octet-stream",
+        },
+        body: file,
+      });
+      if (res.ok) {
+        alert("Uploaded!");
+        fetchDropboxFiles();
+        setFile(null);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Fetch all files
+  const fetchDropboxFiles = async () => {
+    try {
+      const res = await fetch("https://api.dropboxapi.com/2/files/list_folder", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${ACCESS_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ path: "" }),
+      });
+      const data = await res.json();
+      setUploadedFiles(data.entries || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Download file
+  const downloadDropboxFile = async (path, name) => {
+    const res = await fetch("https://content.dropboxapi.com/2/files/download", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${ACCESS_TOKEN}`,
+        "Dropbox-API-Arg": JSON.stringify({ path }),
+      },
+    });
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  // Delete file
+  const deleteDropboxFile = async (path) => {
+    await fetch("https://api.dropboxapi.com/2/files/delete_v2", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${ACCESS_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ path }),
+    });
+    alert("Deleted!");
+    fetchDropboxFiles();
+  };
+
+ 
+
+  // Start editing text file
+  const editDropboxFile = async (file) => {
+    const res = await fetch("https://content.dropboxapi.com/2/files/download", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${ACCESS_TOKEN}`,
+        "Dropbox-API-Arg": JSON.stringify({ path: file.path_lower }),
+      },
+    });
+    const text = await res.text();
+    setEditingFile(file);
+    setEditContent(text);
+  };
+
+  // Save edited file
+  const saveEditedFile = async () => {
+    const blob = new Blob([editContent], { type: "text/plain" });
+    await fetch("https://content.dropboxapi.com/2/files/upload", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${ACCESS_TOKEN}`,
+        "Dropbox-API-Arg": JSON.stringify({
+          path: editingFile.path_lower,
+          mode: "overwrite",
+          autorename: false,
+          mute: false,
+        }),
+        "Content-Type": "application/octet-stream",
+      },
+      body: blob,
+    });
+    alert("File updated!");
+    setEditingFile(null);
+    setEditContent("");
+    fetchDropboxFiles();
+  };
+
+  useEffect(() => {
+    fetchDropboxFiles();
+  }, []);
+
+  return (
+    <div style={{ padding: "30px", fontFamily: "Arial" }}>
+      <h5>Free Cloud Storage</h5>
+      <input type="file" onChange={(e) => setFile(e.target.files[0])} />
+      <button onClick={uploadToDropbox}>Upload</button>
+      <hr />
+
+      <h5>Uploaded Files</h5>
+      {uploadedFiles.length === 0 ? (
+        <p>No files uploaded yet.</p>
+      ) : (
+        <ul>
+          {uploadedFiles.map((f) => (
+            <li key={f.id}>
+              {f.name}{" "}
+              
+              <button onClick={() => downloadDropboxFile(f.path_lower, f.name)}>Download</button>{" "}
+              <button onClick={() => editDropboxFile(f)}>Edit</button>{" "}
+              <button onClick={() => deleteDropboxFile(f.path_lower)}>Delete</button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {editingFile && (
+        <div style={{ marginTop: "20px" }}>
+          <h4>Editing: {editingFile.name}</h4>
+          <textarea
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            style={{ width: "100%", height: "200px" }}
+          ></textarea>
+          <br />
+          <button onClick={saveEditedFile} style={{ marginTop: "10px" }}>
+            Save Changes
+          </button>
+          <button onClick={() => setEditingFile(null)} style={{ marginLeft: "10px" }}>
+            Cancel
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default App;
+
+
+
+#Auth0
+
+1. Auth0.com
+2. Login with google
+3. Personal
+4. Single Page Application
+5. Tech stack = React
+6. Move to Settings
+7. Copy Domain and Client ID from webpage to the index.js file
+8. Paste localhost url at the fields except first one
+9. Save
+10. Run the code using npm start
+11. If it throws any error, install the dependency @auth0/auth0-react
+
+index.js
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import { Auth0Provider } from "@auth0/auth0-react";
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(
+  <Auth0Provider
+    domain="dev-de6gfeckh20sbxre.us.auth0.com"
+    clientId="rYMoaDg6Wyig3fcl3HSjVUUWC3XNgZ2c"
+    authorizationParams={{
+      redirect_uri: window.location.origin
+    }}
+  >
+    <App />
+  </Auth0Provider>
+);
+
+App.js
+import React, { useState } from "react";
+import { useAuth0 } from "@auth0/auth0-react";
+
+function App() {
+  const { loginWithRedirect, logout, user, isAuthenticated, isLoading } = useAuth0();
+  const [todos, setTodos] = useState([]);
+  const [newTodo, setNewTodo] = useState("");
+
+  if (isLoading) return <h2 style={{ textAlign: "center", marginTop: "2rem" }}>Loading...</h2>;
+
+  const addTodo = () => {
+    if (newTodo.trim() === "") return;
+    setTodos([...todos, newTodo]);
+    setNewTodo("");
+  };
+
+  return (
+    <div style={{ fontFamily: "Arial", padding: "2rem", backgroundColor: "#f4f4f9", minHeight: "100vh" }}>
+      <h1 style={{ textAlign: "center", color: "#333" }}>Auth0 React App Demo</h1>
+
+      {isAuthenticated ? (
+        <div style={{ maxWidth: "600px", margin: "2rem auto", padding: "2rem", backgroundColor: "#fff", borderRadius: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+          <div style={{ display: "flex", alignItems: "center", marginBottom: "1rem" }}>
+            <img src={user.picture} alt="profile" width={70} style={{ borderRadius: "50%", marginRight: "1rem" }} />
+            <h2>Welcome, {user.name}</h2>
+          </div>
+
+          <button
+            onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+            style={{ padding: "0.5rem 1rem", backgroundColor: "#ff4d4f", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", marginBottom: "1.5rem" }}
+          >
+            Logout
+          </button>
+
+          <hr style={{ margin: "1.5rem 0" }} />
+
+          <div>
+            <h3 style={{ marginBottom: "0.5rem" }}>My To-Do List</h3>
+            <div style={{ display: "flex", marginBottom: "1rem" }}>
+              <input
+                type="text"
+                placeholder="Add new task..."
+                value={newTodo}
+                onChange={(e) => setNewTodo(e.target.value)}
+                style={{ flex: 1, padding: "0.5rem", borderRadius: "6px", border: "1px solid #ccc" }}
+              />
+              <button
+                onClick={addTodo}
+                style={{ padding: "0.5rem 1rem", marginLeft: "0.5rem", backgroundColor: "#4caf50", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}
+              >
+                Add
+              </button>
+            </div>
+            <ul>
+              {todos.map((todo, index) => (
+                <li key={index} style={{ marginBottom: "0.5rem", padding: "0.5rem", backgroundColor: "#f0f0f0", borderRadius: "6px" }}>
+                  {todo}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      ) : (
+        <div style={{ textAlign: "center", marginTop: "5rem" }}>
+          <button
+            onClick={() => loginWithRedirect()}
+            style={{ padding: "0.7rem 2rem", fontSize: "1rem", backgroundColor: "#1890ff", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer" }}
+          >
+            Login to Continue
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+
+#FIREBASE HOSTING
+1. console.firebase.google.com
+2. create new project
+3. ai and gemini disable
+4. Settings > Project settings
+5. WEB
+6. follow the steps - check hosting box, copy cmd and code
+App.js
+import React from "react";
+import app from "./firebase.js"
+function App() { return <h1>Hello from React!</h1>; }
+export default App;
+firebase.js
+copied content + export default app
+7. Series of commands - //npm install react-scripts --save
+- public directory - build
+
+#FIREBASE DATABASE
+App.js
+import React, { useState, useEffect } from "react";
+import { db } from "./firebase";
+import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc } from "firebase/firestore";
+
+function App() {
+const [name, setName] = useState("");
+const [users, setUsers] = useState([]);
+const [editingId, setEditingId] = useState(null);
+const usersRef = collection(db, "users");
+
+const addUser = async () => {
+  if (!name.trim()) return;
+  await addDoc(usersRef, { name });
+  setName("");
+  fetchUsers();
+};
+
+const fetchUsers = async () => {
+  const data = await getDocs(usersRef);
+  const userList = data.docs.map((d) => ({ id: d.id, ...d.data() }));
+  setUsers(userList);
+};
+
+const updateUser = async (id) => {
+  if (!name.trim()) return;
+  const userDoc = doc(db, "users", id);
+  await updateDoc(userDoc, { name });
+  setEditingId(null);
+  setName("");
+  fetchUsers();
+};
+
+const deleteUser = async (id) => {
+  const userDoc = doc(db, "users", id);
+  await deleteDoc(userDoc);
+  fetchUsers();
+};
+
+useEffect(() => {
+  fetchUsers();
+}, []);
+
+return (
+  <div style={{ textAlign: "center", marginTop: 50 }}>
+    <h2>Firestore CRUD Demo</h2>
+
+    <input
+      value={name}
+      onChange={(e) => setName(e.target.value)}
+      placeholder="Enter name"
+      style={{ padding: "6px", marginRight: "8px" }}
+    />
+
+    {editingId ? (
+      <button onClick={() => updateUser(editingId)}>Update</button>
+    ) : (
+      <button onClick={addUser}>Add</button>
+    )}
+
+    <ul style={{ listStyle: "none", padding: 0, marginTop: 20 }}>
+      {users.map((user) => (
+        <li key={user.id} style={{ marginBottom: "10px" }}>
+          {user.name}
+          <button
+            onClick={() => {
+              setName(user.name);
+              setEditingId(user.id);
+            }}
+            style={{ marginLeft: "10px" }}
+          >EDIT
+          </button>
+          <button
+            onClick={() => deleteUser(user.id)}
+            style={{ marginLeft: "5px", color: "red" }}
+          >DELETE
+          </button>
+        </li>
+      ))}
+    </ul>
+  </div>
+);
+}
+
+export default App;
+
+firebase.js
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import {getFirestore} from "firebase/firestore";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyAtLo7HfLGrjqNxPfiyK8KlgvsQSJpTT6Y",
+  authDomain: "psv-services.firebaseapp.com",
+  projectId: "psv-services",
+  storageBucket: "psv-services.firebasestorage.app",
+  messagingSenderId: "54842840223",
+  appId: "1:54842840223:web:66180fa5aba6529a74feaa",
+  measurementId: "G-SLQ6T8H0DT"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db=getFirestore(app);
+
+export {db};
+
+npm build run
+npm start
+
+1. firebase
+2. build
+3. create database
+4. use firestore database
+5. add database
+6. run in test mode
+
+#MongoDB Atlas
+myapp/
+ ├── backend/
+ │    ├── server.js
+ │    └── models/User.js
+ |
+ |── src/App.js
+
+backend/models/User.js
+const mongoose = require("mongoose");
+
+const userSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+});
+
+module.exports = mongoose.model("User", userSchema);
+
+📁 backend/server.js
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const User = require("./models/User");
+
+const app = express();
+app.use(express.json());
+app.use(cors());
+
+// ✅ Connect to MongoDB (replace with your MongoDB URI)
+mongoose.connect("YOUR_MONGODB_ATLAS_URL_HERE")
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch(err => console.log(err));
+
+// ➕ Add user
+app.post("/users", async (req, res) => {
+  const user = new User({ name: req.body.name });
+  await user.save();
+  res.send(user);
+});
+
+// 📜 Get all users
+app.get("/users", async (req, res) => {
+  const users = await User.find();
+  res.send(users);
+});
+
+// ✏ Update user
+app.put("/users/:id", async (req, res) => {
+  const user = await User.findByIdAndUpdate(req.params.id, { name: req.body.name }, { new: true });
+  res.send(user);
+});
+
+// ❌ Delete user
+app.delete("/users/:id", async (req, res) => {
+  await User.findByIdAndDelete(req.params.id);
+  res.send({ message: "User deleted" });
+});
+
+app.listen(5000, () => console.log("🚀 Server running on port 5000"));
+
+⚛ 2. Frontend (React)
+📁 frontend/src/App.js
+import React, { useState, useEffect } from "react";
+
+function App() {
+  const [name, setName] = useState("");
+  const [users, setUsers] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+  const API_URL = "http://localhost:5000/users";
+
+  const fetchUsers = async () => {
+    const res = await fetch(API_URL);
+    const data = await res.json();
+    setUsers(data);
+  };
+
+  const addUser = async () => {
+    if (!name.trim()) return;
+    await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    });
+    setName("");
+    fetchUsers();
+  };
+
+  const updateUser = async (id) => {
+    await fetch(${API_URL}/${id}, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    });
+    setName("");
+    setEditingId(null);
+    fetchUsers();
+  };
+
+  const deleteUser = async (id) => {
+    await fetch(${API_URL}/${id}, { method: "DELETE" });
+    fetchUsers();
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  return (
+    <div style={{ textAlign: "center", marginTop: 50 }}>
+      <h2>MongoDB CRUD Demo</h2>
+
+      <input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Enter name"
+        style={{ padding: "6px", marginRight: "8px" }}
+      />
+
+      {editingId ? (
+        <button onClick={() => updateUser(editingId)}>Update</button>
+      ) : (
+        <button onClick={addUser}>Add</button>
+      )}
+
+      <ul style={{ listStyle: "none", padding: 0, marginTop: 20 }}>
+        {users.map((user) => (
+          <li key={user._id} style={{ marginBottom: "10px" }}>
+            {user.name}
+            <button
+              onClick={() => {
+                setName(user.name);
+                setEditingId(user._id);
+              }}
+              style={{ marginLeft: "10px" }}
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => deleteUser(user._id)}
+              style={{ marginLeft: "5px", color: "red" }}
+            >
+              Delete
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export default App;
+
+🚀 To Run It
+Backend
+cd backend
+npm init -y
+npm install express mongoose cors
+node server.js
+
+Frontend
+npm start

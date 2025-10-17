@@ -1,0 +1,154 @@
+Spark:
+
+sudo apt update && sudo apt upgrade -y
+sudo apt install openjdk-11-jdk -y
+java -version
+sudo apt install scala -y
+scala -version
+cd /home/tce/Downloads
+sudo mv spark-3.5.3-bin-hadoop3 /opt/spark
+cd /opt/spark
+nano ~/.bashrc
+export SPARK_HOME=/opt/spark
+export PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin
+export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
+export SCALA_HOME=/usr/share/scala
+source ~/.bashrc
+cd /opt/spark/bin
+spark-shell
+:quit
+gedit input.txt
+spark-shell
+val in=sc.textFile("file:///opt/spark/bin/input.txt")
+val c=in.flatMap(line=>line.split(" ")).map(word=>(word,1)).reduceByKey(_ + _)
+c.collect().foreach(println)
+
+Openmp:
+
+sudo apt update -y
+sudo apt install gcc -y
+
+#include <stdio.h>
+#include <omp.h>
+#define SIZE 1000000
+int main() {
+    int i;
+    double serial_sum = 0.0;
+    double parallel_sum = 0.0;
+    double arr[SIZE];
+    for (i = 0; i < SIZE; i++)
+        arr[i] = i + 1;  // 1, 2, 3, ..., SIZE
+    double start_serial = omp_get_wtime();
+    for (i = 0; i < SIZE; i++)
+        serial_sum += arr[i];
+    double end_serial = omp_get_wtime();
+    double start_parallel = omp_get_wtime();
+    #pragma omp parallel for reduction(+:parallel_sum)
+    for (i = 0; i < SIZE; i++)
+        parallel_sum += arr[i];
+    double end_parallel = omp_get_wtime();
+    printf("Serial Sum   = %.0f, Time = %.6f sec\n", serial_sum, end_serial - start_serial);
+    printf("Parallel Sum = %.0f, Time = %.6f sec\n", parallel_sum, end_parallel - start_parallel);
+    return 0;
+}
+
+gcc -fopenmp openmp_sum.c -o openmp_sum
+./openmp_sum
+
+Mpi:
+
+sudo apt update -y
+sudo apt install mpich -y
+#include <mpi.h>
+#include <stdio.h>
+int main(int argc, char** argv) {
+    int rank, size;
+    MPI_Init(&argc, &argv);            
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank); 
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    printf("Hello from process %d out of %d processes!\n", rank, size);
+    MPI_Finalize();                      
+    return 0;
+}
+
+mpicc mpi_hello.c -o mpi_out
+mpirun -np 4 ./mpi_out
+
+Hadoop
+
+If dpkg lock,
+sudo lsof /var/lib/dpkg/lock-frontend
+sudo kill -9 5138
+sudo rm /var/lib/dpkg/lock-frontend
+sudo rm /var/lib/dpkg/lock
+
+Regular commands:
+
+sudo apt update
+sudo apt install openjdk-8-jdk ssh wget -y
+cd /home/tce/Downloads or cd ~/Downloads
+wget https://archive.apache.org/dist/hadoop/common/hadoop-3.2.1/hadoop-3.2.1.tar.gz
+tar -xvzf hadoop-3.2.1.tar.gz
+sudo mv hadoop-3.2.1 /usr/local/hadoop
+cd /usr/local/hadoop
+
+nano ~/.bashrc
+//add at end
+export HADOOP_HOME=/usr/local/hadoop
+export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
+export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+
+source ~/.bashrc
+
+hadoop version
+cd $HADOOP_HOME/etc/hadoop
+
+nano hadoop-env.sh
+//add or modify
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+
+nano core-site.xml
+<configuration>
+  <property>
+    <name>fs.defaultFS</name>
+    <value>hdfs://localhost:9000</value>
+  </property>
+</configuration>
+
+nano hdfs-site.xml
+<configuration>
+  <property>
+    <name>dfs.replication</name>
+    <value>1</value>
+  </property>
+  <property>
+    <name>dfs.namenode.name.dir</name>
+    <value>file:/usr/local/hadoop/hadoop_data/hdfs/namenode</value>
+  </property>
+  <property>
+    <name>dfs.datanode.data.dir</name>
+    <value>file:/usr/local/hadoop/hadoop_data/hdfs/datanode</value>
+  </property>
+</configuration>
+
+sudo mkdir -p /usr/local/hadoop/hadoop_data/hdfs/namenode
+sudo mkdir -p /usr/local/hadoop/hadoop_data/hdfs/datanode
+sudo chown -R $USER:$USER /usr/local/hadoop/hadoop_data
+ssh-keygen -t rsa -P ""
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+ssh localhost
+exit
+hdfs namenode -format
+hdfs namenode -format
+start-dfs.sh
+start-yarn.sh
+jps
+hdfs dfs -mkdir /input
+echo "hello hadoop hello world" > input.txt
+hdfs dfs -put input.txt /input
+hadoop jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar wordcount /input /output
+hdfs dfs -cat /output/part-r-00000
+stop-yarn.sh
+stop-dfs.sh
