@@ -1,0 +1,291 @@
+idhu thhan da na padichen Got it! Let’s do a *super easy, “exam-ready”” Hadoop installation* on *Oracle VM* — minimal commands, no long setup headaches 
+---
+
+## 🖥 Prerequisites
+
+1. *Oracle VM* installed (Ubuntu 22.04 recommended).
+2. *Java installed* (openjdk 11 or above). Hadoop needs Java.
+
+   bash
+   java -version
+   sudo apt install openjdk-11-jdk -y
+   
+3. *SSH installed* (Hadoop requires passwordless SSH even for single-node setup):
+
+   bash
+   sudo apt install ssh -y
+   ssh-keygen -t rsa -P ""   # Press Enter for no passphrase
+   cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+   ssh localhost   # Should log in without password
+   
+
+---
+
+## 🟢 Step 1: Download Hadoop
+
+bash
+cd /opt
+sudo wget https://downloads.apache.org/hadoop/common/hadoop-3.3.6/hadoop-3.3.6.tar.gz
+sudo tar -xvzf hadoop-3.3.6.tar.gz
+sudo mv hadoop-3.3.6 hadoop
+
+
+---
+
+## 🟢 Step 2: Setup Environment Variables
+
+bash
+nano ~/.bashrc
+
+
+Add at the end:
+
+bash
+export HADOOP_HOME=/opt/hadoop
+export HADOOP_INSTALL=$HADOOP_HOME
+export HADOOP_MAPRED_HOME=$HADOOP_HOME
+export HADOOP_COMMON_HOME=$HADOOP_HOME
+export HADOOP_HDFS_HOME=$HADOOP_HOME
+export YARN_HOME=$HADOOP_HOME
+export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+
+
+bash
+source ~/.bashrc
+
+
+---
+
+## 🟢 Step 3: Configure Hadoop (Single Node)
+
+Go to $HADOOP_HOME/etc/hadoop and edit:
+
+1. *core-site.xml*
+
+xml
+<configuration>
+  <property>
+    <name>fs.defaultFS</name>
+    <value>hdfs://localhost:9000</value>
+  </property>
+</configuration>
+
+
+2. *hdfs-site.xml*
+
+xml
+<configuration>
+  <property>
+    <name>dfs.replication</name>
+    <value>1</value>
+  </property>
+  <property>
+    <name>dfs.name.dir</name>
+    <value>file:///opt/hadoopdata/hdfs/namenode</value>
+  </property>
+  <property>
+    <name>dfs.data.dir</name>
+    <value>file:///opt/hadoopdata/hdfs/datanode</value>
+  </property>
+</configuration>
+
+
+3. *mapred-site.xml* (copy first)
+
+bash
+cp mapred-site.xml.template mapred-site.xml
+
+
+Then edit:
+
+xml
+<configuration>
+  <property>
+    <name>mapreduce.framework.name</name>
+    <value>yarn</value>
+  </property>
+</configuration>
+
+
+4. *yarn-site.xml*
+
+xml
+<configuration>
+  <property>
+    <name>yarn.nodemanager.aux-services</name>
+    <value>mapreduce_shuffle</value>
+  </property>
+</configuration>
+
+
+---
+
+## 🟢 Step 4: Format HDFS
+
+bash
+hdfs namenode -format
+
+
+---
+
+## 🟢 Step 5: Start Hadoop
+
+bash
+start-dfs.sh
+start-yarn.sh
+
+
+Check status:
+
+bash
+jps
+
+
+You should see:
+
+
+NameNode
+DataNode
+SecondaryNameNode
+ResourceManager
+NodeManager
+
+
+---
+
+## 🟢 Step 6: Test
+
+bash
+hdfs dfs -mkdir /test
+hdfs dfs -put somefile.txt /test
+hdfs dfs -ls /test
+
+
+Perfect! Let’s do *Apache Spark installation on Oracle VM (Ubuntu)* in the *simplest, fastest way* — minimal steps, easy for exams or practice 😎
+
+---
+
+## 🖥 Prerequisites
+
+1. *Java installed* (Spark needs Java 11+):
+
+bash
+sudo apt update
+sudo apt install openjdk-11-jdk -y
+java -version
+
+
+2. *Python installed* (if using PySpark):
+
+bash
+sudo apt install python3 python3-pip -y
+python3 --version
+
+
+3. *Optional:* Install Hadoop if you want Spark to access HDFS (not required for local mode).
+
+---
+
+## 🟢 Step 1: Download Spark
+
+Go to /opt and download the prebuilt Spark:
+
+bash
+cd /opt
+sudo wget https://downloads.apache.org/spark/spark-3.5.1/spark-3.5.1-bin-hadoop3.tgz
+sudo tar -xvzf spark-3.5.1-bin-hadoop3.tgz
+sudo mv spark-3.5.1-bin-hadoop3 spark
+
+
+---
+
+## 🟢 Step 2: Set Environment Variables
+
+bash
+nano ~/.bashrc
+
+
+Add at the end:
+
+bash
+export SPARK_HOME=/opt/spark
+export PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+
+
+bash
+source ~/.bashrc
+
+
+---
+
+## 🟢 Step 3: Start Spark (Standalone, Local Mode)
+
+1. *Start Spark master*
+
+bash
+start-master.sh
+
+
+* By default, it runs at http://localhost:8080 (you can check your cluster UI).
+
+2. *Start Spark worker*
+
+bash
+start-worker.sh spark://localhost:7077
+
+
+---
+
+## 🟢 Step 4: Test Spark (Python or Scala)
+
+*PySpark test*:
+
+bash
+pyspark
+
+
+Then try:
+
+python
+sc.parallelize([1,2,3,4]).count()
+
+
+* Should return 4 — Spark is working 
+
+*Spark shell test (Scala)*:
+
+bash
+spark-shell
+
+
+Then:
+
+scala
+val data = sc.parallelize(1 to 5)
+data.sum()
+
+
+
+
+bash
+stop-worker.sh
+stop-master.sh
+
+
+---
+
+
+
+bash
+sudo apt update && sudo apt install openjdk-11-jdk python3 python3-pip -y
+cd /opt && sudo wget https://downloads.apache.org/spark/spark-3.5.1/spark-3.5.1-bin-hadoop3.tgz
+sudo tar -xvzf spark-3.5.1-bin-hadoop3.tgz && sudo mv spark-3.5.1-bin-hadoop3 spark
+echo -e "export SPARK_HOME=/opt/spark\nexport PATH=\$PATH:\$SPARK_HOME/bin:\$SPARK_HOME/sbin\nexport JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64" >> ~/.bashrc
+source ~/.bashrc
+start-master.sh && start-worker.sh spark://localhost:7077
+pyspark
+
+
+
