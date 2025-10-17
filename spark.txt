@@ -1,0 +1,350 @@
+export PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin
+export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
+export SCALA_HOME=/usr/share/scala
+source ~/.bashrc
+cd /opt/spark/bin
+spark-shell
+:quit
+gedit input.txt
+spark-shell
+4: Simple Spark WordCount in Python
+Create a file:
+nano wordcount.py
+Paste:
+
+from pyspark import SparkContext
+
+sc = SparkContext("local", "WordCountApp")
+
+
+text_file = sc.textFile("input.txt")
+
+# Split into words and count
+counts = text_file.flatMap(lambda line: line.split(" ")) \
+                  .map(lambda word: (word, 1)) \
+                  .reduceByKey(lambda a, b: a + b)
+
+#Save result
+counts.saveAsTextFile("output_spark")
+
+sc.stop()
+
+5: Run Spark Job
+First create a sample input file:
+echo "Hadoop is fun. Spark is faster. Spark and Hadoop are powerful!" > input.txt
+
+Now run with Spark:
+spark-submit wordcount.py
+
+6: Check Output
+The output will be in a folder called output_spark. Check with:
+ls output_spark/
+cat output_spark/part-00000
+
+
+//openmp
+
+Fibonacci Series using OpenMP
+#include <stdio.h>
+#include <omp.h>
+
+int main() {
+    int n, i;
+    printf("Enter number of terms: ");
+    scanf("%d", &n);
+    int fib[n];
+    fib[0] = 0;
+    fib[1] = 1;
+
+    #pragma omp parallel for
+    for(i = 2; i < n; i++) {
+        fib[i] = fib[i-1] + fib[i-2];
+    }
+
+    printf("Fibonacci Series: ");
+    for(i = 0; i < n; i++)
+        printf("%d ", fib[i]);
+    printf("\n");
+
+    return 0;
+}
+ How to compile & run:
+gcc -fopenmp fib_openmp.c -o fib
+./fib
+________________________________________
+Example 2: Check Prime Numbers using OpenMP
+#include <stdio.h>
+#include <omp.h>
+
+int main() {
+    int n, i, count = 0;
+    printf("Enter a number: ");
+    scanf("%d", &n);
+
+    #pragma omp parallel for reduction(+:count)
+    for(i = 1; i <= n; i++) {
+        if(n % i == 0)
+            count++;
+    }
+
+    if(count == 2)
+        printf("%d is a Prime Number\n", n);
+    else
+        printf("%d is NOT a Prime Number\n", n);
+
+    return 0;
+}
+Run it:
+gcc -fopenmp prime_openmp.c -o prime
+./prime
+
+PART 2: MPI (Distributed Parallelism)
+MPI runs multiple processes, possibly across different computers (or cores).
+ Example 3: Fibonacci using MPI
+#include <stdio.h>
+#include <mpi.h>
+
+int main(int argc, char *argv[]) {
+    int rank, size, n, i, fib[100];
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    if(rank == 0) {
+        printf("Enter number of terms: ");
+        scanf("%d", &n);
+    }
+
+    MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    fib[0] = 0;
+    fib[1] = 1;
+    for(i = 2; i < n; i++)
+        fib[i] = fib[i-1] + fib[i-2];
+
+    if(rank == 0) {
+        printf("Fibonacci Series: ");
+        for(i = 0; i < n; i++)
+            printf("%d ", fib[i]);
+        printf("\n");
+    }
+
+    MPI_Finalize();
+    return 0;
+}
+ Compile and run:
+mpicc fib_mpi.c -o fib_mpi
+mpirun -np 4 ./fib_mpi
+________________________________________
+ Example 4: Prime Check using MPI
+#include <stdio.h>
+#include <mpi.h>
+
+int main(int argc, char *argv[]) {
+    int rank, size, n, i, count = 0, local_count = 0;
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    if(rank == 0) {
+        printf("Enter a number: ");
+        scanf("%d", &n);
+    }
+
+    MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    for(i = rank + 1; i <= n; i += size) {
+        if(n % i == 0)
+            local_count++;
+    }
+
+    MPI_Reduce(&local_count, &count, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+
+    if(rank == 0) {
+        if(count == 2)
+            printf("%d is Prime\n", n);
+        else
+            printf("%d is NOT Prime\n", n);
+    }
+
+    MPI_Finalize();
+    return 0;
+}
+ Run it:
+mpicc prime_mpi.c -o prime_mpi
+mpirun -np 4 ./prime_mpi
+
+
+________________________________________
+OpenMP (C Programs)
+(Compile with gcc filename.c -fopenmp -o output 
+run ./output)
+________________________________________
+ Program 1 — Hello World with Threads
+#include <stdio.h>
+#include <omp.h>
+
+int main() {
+    #pragma omp parallel
+    {
+        int tid = omp_get_thread_num();
+        printf("Hello from thread %d\n", tid);
+    }
+    return 0;
+}
+Concept: Each thread prints its own message using omp_get_thread_num().
+________________________________________
+ Program 2 — Parallel For Loop
+#include <stdio.h>
+#include <omp.h>
+
+int main() {
+    int i;
+    #pragma omp parallel for
+    for (i = 0; i < 5; i++) {
+        printf("Iteration %d executed by thread %d\n", i, omp_get_thread_num());
+    }
+    return 0;
+}
+ Concept: Automatically divides loop iterations among threads.
+________________________________________
+ Program 3 — Reduction (Sum of Array)
+#include <stdio.h>
+#include <omp.h>
+
+int main() {
+    int i;
+    int sum = 0;
+    int a[5] = {1, 2, 3, 4, 5};
+
+    #pragma omp parallel for reduction(+:sum)
+    for (i = 0; i < 5; i++) {
+        sum += a[i];
+    }
+
+    printf("Total Sum = %d\n", sum);
+    return 0;
+}
+ Concept: Each thread adds partial sums, and OpenMP handles combining results.
+________________________________________
+ Program 4 — Critical Section Example
+#include <stdio.h>
+#include <omp.h>
+
+int main() {
+    int count = 0;
+
+    #pragma omp parallel
+    {
+        #pragma omp critical
+        {
+            count++;
+            printf("Thread %d incremented count = %d\n", omp_get_thread_num(), count);
+        }
+    }
+    return 0;
+}
+ Concept: #pragma omp critical ensures safe access to shared variables.
+________________________________________
+ MPI (Message Passing Interface)
+(Compile with mpicc filename.c -o output and run with mpirun -np 4 ./output)
+________________________________________
+Program 1 — Hello World
+#include <mpi.h>
+#include <stdio.h>
+
+int main(int argc, char** argv) {
+    MPI_Init(&argc, &argv);
+
+    int rank, size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    printf("Hello from process %d of %d\n", rank, size);
+
+    MPI_Finalize();
+    return 0;
+}
+Concept: Each process prints its rank (unique ID).
+________________________________________
+Program 2 — Point-to-Point Communication
+#include <mpi.h>
+#include <stdio.h>
+
+int main(int argc, char** argv) {
+    MPI_Init(&argc, &argv);
+
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    int number;
+    if (rank == 0) {
+        number = 100;
+        MPI_Send(&number, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
+        printf("Process 0 sent number %d\n", number);
+    } else if (rank == 1) {
+        MPI_Recv(&number, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        printf("Process 1 received number %d\n", number);
+    }
+
+    MPI_Finalize();
+    return 0;
+}
+Concept: Process 0 sends data, Process 1 receives it.
+
+Program 3 — Broadcast
+#include <mpi.h>
+#include <stdio.h>
+
+int main(int argc, char** argv) {
+    MPI_Init(&argc, &argv);
+
+    int rank, number;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    if (rank == 0) {
+        number = 42;
+    }
+
+    MPI_Bcast(&number, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    printf("Process %d received number %d\n", rank, number);
+
+    MPI_Finalize();
+    return 0;
+}
+Concept: Rank 0 broadcasts a value to all other processes.
+Program 4 — Scatter and Gather
+#include <mpi.h>
+#include <stdio.h>
+
+int main(int argc, char** argv) {
+    MPI_Init(&argc, &argv);
+
+    int rank, size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    int send_data[4] = {10, 20, 30, 40};
+    int recv_data;
+
+    MPI_Scatter(send_data, 1, MPI_INT, &recv_data, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    printf("Process %d received %d\n", rank, recv_data);
+
+    recv_data *= 2; // Modify data
+
+    MPI_Gather(&recv_data, 1, MPI_INT, send_data, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    if (rank == 0) {
+        printf("Final gathered data: ");
+        for (int i = 0; i < size; i++) printf("%d ", send_data[i]);
+        printf("\n");
+    }
+
+    MPI_Finalize();
+    return 0;
+}
+
+
+sudo apt install git -y
+
